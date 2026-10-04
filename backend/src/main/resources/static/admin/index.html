@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f5f6f8">
+  <title>Admin dashboard · Clarigence</title>
+  <link rel="stylesheet" href="/admin/admin.css">
+  <script src="/admin/admin.js" defer></script>
+</head>
+<body>
+  <main id="login-view" class="login-shell" hidden>
+    <a class="login-brand" href="/admin/" aria-label="Clarigence admin"><img class="admin-brand-image" src="/admin/images/clarigence-logo.png" alt="Clarigence"></a>
+    <section class="login-card" aria-labelledby="login-title">
+      <p class="eyebrow">ADMINISTRATION</p>
+      <h1 id="login-title">Welcome back.</h1>
+      <p class="login-copy">Sign in to manage your enquiries.</p>
+      <form id="login-form">
+        <label for="login-email">Admin email</label>
+        <input id="login-email" name="email" type="email" autocomplete="username" required maxlength="254" placeholder="you@company.com">
+        <label for="login-password">Password</label>
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required maxlength="72" placeholder="Your password">
+        <button class="button primary-button" type="submit">Sign in <span aria-hidden="true">↗</span></button>
+        <p id="login-message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+    <p class="login-foot">Clarigence · Internal workspace</p>
+  </main>
+
+  <div id="dashboard-view" class="app-shell" hidden>
+    <aside class="sidebar">
+      <a class="sidebar-brand" href="/admin/" aria-label="Clarigence admin home"><img class="admin-brand-image" src="/admin/images/clarigence-logo.png" alt="Clarigence"><small class="sidebar-brand-caption">ADMIN WORKSPACE</small></a>
+      <nav class="side-nav" aria-label="Admin navigation">
+        <a class="side-link selected" href="#overview" aria-current="page"><span aria-hidden="true">◫</span> Overview</a>
+        <a class="side-link" href="#enquiries"><span aria-hidden="true">▤</span> Enquiries</a>
+      </nav>
+      <div class="sidebar-bottom"><span class="secure-dot"></span><span>Private admin area</span></div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <div class="mobile-brand"><img class="admin-brand-image" src="/admin/images/clarigence-logo.png" alt="Clarigence"></div>
+        <div class="topbar-spacer"></div>
+        <span id="admin-email" class="admin-email"></span>
+        <button id="logout-button" class="logout-button" type="button">Sign out <span aria-hidden="true">↗</span></button>
+      </header>
+
+      <div class="content-wrap">
+        <section id="overview" class="page-heading">
+          <div><p class="eyebrow">CLARIGENCE · INBOX</p><h1>Enquiry overview</h1><p class="page-subtitle">A clear view of every new conversation.</p></div>
+          <span class="today-pill"><span class="secure-dot"></span> Private workspace</span>
+        </section>
+
+        <section class="stat-grid" aria-label="Enquiry totals">
+          <article class="stat-card total-card"><span class="stat-label">TOTAL ENQUIRIES</span><div class="stat-value" id="stat-total">—</div><span class="stat-foot">All website enquiries</span></article>
+          <article class="stat-card"><span class="stat-label"><i class="status-dot new-dot"></i> NEW</span><div class="stat-value" id="stat-new">—</div><span class="stat-foot">Awaiting first contact</span></article>
+          <article class="stat-card"><span class="stat-label"><i class="status-dot contacted-dot"></i> CONTACTED</span><div class="stat-value" id="stat-contacted">—</div><span class="stat-foot">In progress</span></article>
+          <article class="stat-card"><span class="stat-label"><i class="status-dot converted-dot"></i> CONVERTED</span><div class="stat-value" id="stat-converted">—</div><span class="stat-foot">Won opportunities</span></article>
+          <article class="stat-card"><span class="stat-label"><i class="status-dot closed-dot"></i> CLOSED</span><div class="stat-value" id="stat-closed">—</div><span class="stat-foot">Completed or archived</span></article>
+        </section>
+
+        <section id="enquiries" class="inbox-section" aria-labelledby="inbox-title">
+          <div class="inbox-heading"><div><p class="eyebrow">YOUR CONTACT FORM</p><h2 id="inbox-title">Enquiries</h2></div><span id="result-count" class="result-count"></span></div>
+          <div class="filter-bar">
+            <label class="search-box"><span aria-hidden="true">⌕</span><span class="sr-only">Search enquiries</span><input id="search-input" type="search" placeholder="Search name, email, company…" autocomplete="off"></label>
+            <label class="filter-select"><span class="sr-only">Filter by status</span><select id="status-filter"><option value="">All statuses</option><option value="NEW">New</option><option value="CONTACTED">Contacted</option><option value="CONVERTED">Converted</option><option value="CLOSED">Closed</option></select></label>
+            <button id="refresh-button" class="refresh-button" type="button"><span aria-hidden="true">↻</span> Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table class="enquiry-table"><thead><tr><th scope="col">CONTACT</th><th scope="col">SERVICE</th><th scope="col">RECEIVED</th><th scope="col">STATUS</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead><tbody id="enquiry-rows"></tbody></table>
+            <div id="empty-state" class="empty-state" hidden><span class="empty-icon" aria-hidden="true">✳</span><h3>No enquiries here yet.</h3><p>New website enquiries will appear here.</p></div>
+          </div>
+          <div class="table-footer"><span id="pagination-label">Page 1</span><div><button id="previous-page" class="pager-button" type="button" aria-label="Previous page">←</button><button id="next-page" class="pager-button" type="button" aria-label="Next page">→</button></div></div>
+          <p id="dashboard-message" class="dashboard-message" role="status" aria-live="polite"></p>
+        </section>
+        <footer class="app-footer"><span>Clarigence Admin</span><span>Enquiry data is visible to authorized administrators only.</span></footer>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="detail-dialog" class="detail-dialog" aria-labelledby="detail-title">
+    <div class="dialog-top"><div><p class="eyebrow">ENQUIRY DETAILS</p><h2 id="detail-title">Contact enquiry</h2></div><button id="close-detail" class="icon-button" type="button" aria-label="Close enquiry details">×</button></div>
+    <div id="detail-content" class="detail-content"></div>
+    <div class="dialog-actions"><label for="detail-status">Update status</label><select id="detail-status"><option value="NEW">New</option><option value="CONTACTED">Contacted</option><option value="CONVERTED">Converted</option><option value="CLOSED">Closed</option></select><button id="save-status" class="button primary-button" type="button">Save status</button><button id="delete-enquiry" class="delete-button" type="button">Delete enquiry</button></div>
+    <p id="detail-message" class="form-message" role="status" aria-live="polite"></p>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.git/
+.vercel/
+target/
+.env
+.env.*
+*.log
+startup-error.txt
+clarigence.sql

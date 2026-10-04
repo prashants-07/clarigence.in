@@ -1,0 +1,11 @@
+.git/
+.vercel/
+backend/
+dist/
+node_modules/
+*.log
+.env
+.env.*
+.aws/
+.codex/
+.agents/
