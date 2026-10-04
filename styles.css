@@ -124,3 +124,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .button-outline:hover{background:#eaf3ff;border-color:#0058c8}
 .form-note[data-state="success"]{color:#236146}
 .form-note[data-state="error"]{color:#a13d36}
+
+/* Footer social links */
+.footer-social{display:flex;align-items:center;gap:10px;margin-top:16px}.footer-social a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid var(--line);border-radius:50%;color:var(--ink);transition:background .2s,color .2s,border-color .2s}.footer-social a:hover{background:var(--ink);border-color:var(--ink);color:#fff}.footer-social a:focus-visible{outline:2px solid var(--green);outline-offset:4px}.footer-social svg{width:20px;height:20px;flex-shrink:0}
