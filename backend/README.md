@@ -84,6 +84,21 @@ the live form, then confirm the enquiry appears in the backend admin dashboard.
 Do not create fabricated production enquiries. A successful frontend deployment
 alone does not mean enquiries are being stored.
 
+## Railway admin status updates returning 403
+
+Open the admin dashboard on the backend itself at
+`https://clarigencein-production.up.railway.app/admin/`.
+The production profile sets `server.forward-headers-strategy=framework` so Spring
+recognizes the original HTTPS origin behind Railway's reverse proxy. Without
+this setting, same-origin PUT and DELETE requests can be mistaken for CORS
+requests and rejected by the public contact form's POST-only CORS policy.
+
+For an existing Railway deployment, set `SERVER_FORWARD_HEADERS_STRATEGY=framework`
+in the backend service's Variables and redeploy. Also keep
+`SPRING_PROFILES_ACTIVE=production` and `SESSION_COOKIE_SECURE=true`.
+Reload the dashboard and sign in again after deployment. Admin requests must
+include their session cookie and `X-XSRF-TOKEN` header; keep CSRF protection enabled.
+
 ## Prepare MySQL
 
 Open MySQL Command Line Client (or run `mysql -u root -p` in CMD). Create a database and application account, choosing your own strong password. Do not commit that password to this project.

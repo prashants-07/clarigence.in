@@ -25,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@SpringBootTest
+@SpringBootTest(properties = "server.forward-headers-strategy=framework")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class AdminDashboardIntegrationTest {
@@ -91,6 +91,10 @@ class AdminDashboardIntegrationTest {
                 .andExpect(jsonPath("$.message").value("We are planning a new company website."));
 
         mockMvc.perform(put("/api/admin/enquiries/{id}/status", saved.getId())
+                        .header("Origin", "https://clarigencein-production.up.railway.app")
+                        .header("X-Forwarded-Proto", "https")
+                        .header("X-Forwarded-Host", "clarigencein-production.up.railway.app")
+                        .header("X-Forwarded-Port", "443")
                         .session(session)
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue())
@@ -100,6 +104,10 @@ class AdminDashboardIntegrationTest {
                 .andExpect(jsonPath("$.status").value("CONTACTED"));
 
         mockMvc.perform(delete("/api/admin/enquiries/{id}", saved.getId())
+                        .header("Origin", "https://clarigencein-production.up.railway.app")
+                        .header("X-Forwarded-Proto", "https")
+                        .header("X-Forwarded-Host", "clarigencein-production.up.railway.app")
+                        .header("X-Forwarded-Port", "443")
                         .session(session)
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue()))
