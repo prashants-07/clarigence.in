@@ -6,7 +6,7 @@
 /* Refined visual system */
 :root{--paper:#f7f8f9;--ink:#142a28;--muted:#667672;--line:#e1e7e1;--green:#203858;--lime:#94b8e8}
 body{font-size:15px;line-height:1.7}
-.site-header{height:82px;border-bottom-color:#e8ece7;backdrop-filter:blur(14px)}
+.site-header{height:82px;border-bottom-color:#e8ece7;position:sticky;top:0;z-index:100;background:var(--paper);backdrop-filter:blur(14px)}
 .brand{font-size:23px;letter-spacing:-1.35px}
 .brand-mark{grid-template-columns:repeat(2,9px);grid-template-rows:repeat(2,9px);gap:3px}
 .nav-links a{position:relative;padding:7px 0;color:#687772;transition:color .2s ease}
