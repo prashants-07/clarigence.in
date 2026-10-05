@@ -204,3 +204,34 @@ mvn clean verify
 ```
 
 Integration tests use a temporary H2 database and exercise contact submission, validation and CORS, plus admin login, authorization, CSRF, dashboard listing/filtering, details, status changes, deletion, and logout. They do not use MySQL credentials or add test records to your MySQL database.
+## Enquiry email notifications
+
+Enquiries are always saved in the admin portal. To also send notifications to
+`clarigence@gmail.com`, configure these environment variables on the backend host:
+
+```text
+ENQUIRY_EMAIL_ENABLED=true
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=clarigence@gmail.com
+SMTP_PASSWORD=<Google App Password>
+ENQUIRY_EMAIL_FROM=clarigence@gmail.com
+ENQUIRY_EMAIL_TO=clarigence@gmail.com
+```
+
+For Gmail, enable 2-Step Verification and create an App Password:
+https://support.google.com/accounts/answer/185833
+Store the App Password only in the host's secret environment settings; do not put
+it in source code or use your normal Google account password. Another SMTP
+provider can be used by changing the host, username, password and sender address.
+
+Redeploy the backend after setting these values, then submit a test enquiry and
+check both the admin portal and recipient inbox. Notifications include enquiry
+details and set Reply-To to the visitor's email address.
+
+Sending is attempted after the database transaction commits, before the HTTP
+request finishes, with SMTP timeouts configured as recommended by Spring Boot:
+https://docs.spring.io/spring-boot/reference/io/email.html
+Email failures are logged using the enquiry ID, while the form still returns
+success and the enquiry stays saved. There is currently no automatic email retry.
+Notifications are disabled by default until SMTP is configured.

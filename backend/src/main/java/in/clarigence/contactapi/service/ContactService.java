@@ -6,6 +6,7 @@ import in.clarigence.contactapi.entity.Contact;
 import in.clarigence.contactapi.exception.ContactPersistenceException;
 import in.clarigence.contactapi.repository.ContactRepository;
 import java.util.Locale;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ContactService {
 
     private final ContactRepository contactRepository;
+    private final ApplicationEventPublisher events;
 
-    public ContactService(ContactRepository contactRepository) {
+    public ContactService(ContactRepository contactRepository, ApplicationEventPublisher events) {
         this.contactRepository = contactRepository;
+        this.events = events;
     }
 
     @Transactional
@@ -32,6 +35,7 @@ public class ContactService {
 
         try {
             Contact saved = contactRepository.saveAndFlush(contact);
+            events.publishEvent(new EnquiryCreated(saved));
             return new ContactResponse(saved.getId(), "Your enquiry has been received.", saved.getCreatedAt());
         } catch (DataAccessException exception) {
             throw new ContactPersistenceException("We could not save your enquiry right now.", exception);
