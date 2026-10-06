@@ -13,6 +13,7 @@ const publicFiles = [
   'styles.css',
   'script.js',
   'robots.txt',
+  'favicon.ico',
 ];
 
 const localApiUrl = 'http://localhost:8081/api/contact';
