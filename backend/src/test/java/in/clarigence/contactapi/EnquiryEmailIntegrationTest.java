@@ -12,6 +12,9 @@ import in.clarigence.contactapi.repository.ContactRepository;
 import in.clarigence.contactapi.dto.ContactRequest;
 import in.clarigence.contactapi.service.ContactService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,6 +36,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@ExtendWith(OutputCaptureExtension.class)
 class EnquiryEmailIntegrationTest {
 
     @Autowired private MockMvc mvc;
@@ -68,12 +72,15 @@ class EnquiryEmailIntegrationTest {
     }
 
     @Test
-    void mailFailureStillReturnsSuccessAndKeepsEnquiry() throws Exception {
+    void mailFailureStillReturnsSuccessAndKeepsEnquiry(CapturedOutput output) throws Exception {
         long before = contacts.count();
-        doThrow(new MailSendException("SMTP unavailable")).when(sender).send(any(SimpleMailMessage.class));
+        doThrow(new MailSendException("private-provider-error-secret", new java.net.SocketTimeoutException("private-provider-error-secret")))
+                .when(sender).send(any(SimpleMailMessage.class));
         mvc.perform(post("/api/contact").contentType(MediaType.APPLICATION_JSON).content(REQUEST))
                 .andExpect(status().isCreated());
         assertThat(contacts.count()).isEqualTo(before + 1);
+        assertThat(output.getAll()).contains("saved successfully", "Email sending started", "Email sending failed",
+                "MailSendException", "timed out", "Enquiry remains saved").doesNotContain("private-provider-error-secret");
     }
 
     @Test

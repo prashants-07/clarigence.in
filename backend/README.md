@@ -235,3 +235,37 @@ https://docs.spring.io/spring-boot/reference/io/email.html
 Email failures are logged using the enquiry ID, while the form still returns
 success and the enquiry stays saved. There is currently no automatic email retry.
 Notifications are disabled by default until SMTP is configured.
+
+### Production email troubleshooting
+
+The backend reads `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`,
+`ENQUIRY_EMAIL_ENABLED`, `ENQUIRY_EMAIL_FROM`, and `ENQUIRY_EMAIL_TO`.
+`MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`, and
+`MAIL_TO` are not mapped by this project. Spring Boot also supports direct
+`SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, and
+`SPRING_MAIL_PASSWORD` overrides. If overriding the username that way, explicitly
+set `ENQUIRY_EMAIL_FROM` too: its default uses `SMTP_USERNAME`.
+Avoid conflicting SMTP and Spring settings.
+
+Neither Spring Boot nor the Dockerfile imports local `.env` files. Set the
+variables on the actual backend service and production environment, then
+redeploy; setting them on the static frontend does not configure Spring Boot.
+The SMTP defaults are Gmail on port 587, authentication enabled, STARTTLS enabled
+and required, SSL disabled, and connection/read/write timeouts of 3000 ms.
+For Gmail use an App Password with 2-Step Verification, and use the authenticated
+Gmail address as the sender. Port 465 requires explicit SSL configuration rather
+than the default STARTTLS setup; do not change only the port.
+
+At startup check `SMTP configuration loaded` or `notifications disabled`.
+Credentials and addresses are reported only as configured/not configured.
+For a submission, check the enquiry ID in `saved successfully`, `Email sending
+started`, and either `Email sent successfully` or `Email sending failed`.
+Failure diagnostics classify authentication, DNS, connection, timeout, TLS and
+SMTP rejection errors without printing raw provider messages or enquiry contents.
+SMTP acceptance does not guarantee inbox delivery; check spam and provider logs.
+
+Check the actual host's outbound SMTP policy. Railway currently permits SMTP
+only on Pro and above; Free, Trial and Hobby require an HTTPS email API:
+https://docs.railway.com/networking/outbound-networking
+An upgrade requires a backend redeployment. If SMTP is blocked, credentials or
+longer timeouts cannot fix it. Confirm the host/plan before changing the transport.

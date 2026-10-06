@@ -35,6 +35,7 @@ public class EnquiryEmailNotification {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void send(EnquiryCreated event) {
         Contact contact = event.contact();
+        log.info("Email sending started for saved enquiry {}.", contact.getId());
         try {
             SimpleMailMessage mail = new SimpleMailMessage();
             mail.setTo(recipient);
@@ -58,10 +59,11 @@ public class EnquiryEmailNotification {
                     contact.getEmail(), optional(contact.getPhone()), optional(contact.getCompany()),
                     contact.getService(), contact.getMessage()));
             sender.send(mail);
+            log.info("Email sent successfully for enquiry {} (SMTP server accepted the message).", contact.getId());
         } catch (RuntimeException exception) {
             // Avoid logging enquiry contents or SMTP credentials.
-            log.warn("Email notification failed for saved enquiry {} ({}).",
-                    contact.getId(), exception.getClass().getSimpleName());
+            log.error("Email sending failed for saved enquiry {}: type={}, diagnostic={}. Enquiry remains saved.",
+                    contact.getId(), exception.getClass().getSimpleName(), MailFailureDiagnostic.describe(exception));
         }
     }
 
