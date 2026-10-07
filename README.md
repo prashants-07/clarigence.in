@@ -2,6 +2,8 @@
 
 The public site is a lightweight static website. The separate `backend` project runs the contact API and a protected admin dashboard.
 
+The public shell now loads Services, Portfolio and managed page/settings content through the existing Spring Boot backend. The admin includes the CMS alongside the preserved enquiry tools. See [CMS-GUIDE.md](CMS-GUIDE.md) for APIs, initialization, security, deployment configuration and verification.
+
 ## Deploy the public website to Vercel
 
 Vercel can deploy this static site directly from your computer; GitHub is not required. The Vercel build copies only the six public pages, stylesheet, JavaScript, robots file, and public assets. The Spring Boot backend and its generated JAR are excluded from the Vercel upload.

@@ -1,6 +1,7 @@
 """Generate the existing six static pages from shared Clarigence components."""
 from pathlib import Path
 from html import escape
+import re
 
 ROOT = Path(__file__).resolve().parent.parent
 SERVICES = [
@@ -23,7 +24,7 @@ def button(text,href='contact.html',secondary=False):
 def heading(kicker,title,copy=''):
  return f'<div class="section-heading"><div><p class="eyebrow">{kicker}</p><h2>{title}</h2></div>{f"<p>{copy}</p>" if copy else ""}</div>'
 def cards():
- return '<div class="service-grid">'+''.join(f'<a class="service-card" href="services.html#{s[0]}"><div class="card-top"><span class="icon">{icon(s[2])}</span><span class="card-number">{i:02}</span></div><h3>{s[1]}</h3><p>{s[3]}</p><span class="card-link">Explore service <span aria-hidden="true">↗</span></span></a>' for i,s in enumerate(SERVICES,1))+'</div>'
+ return '<div class="service-grid" data-services aria-busy="true"><p class="content-status content-loading" role="status">Loading services…</p></div>'
 def cta():
  return '<section class="cta-section wrap"><div class="cta-box"><div><p class="eyebrow">LET’S BUILD YOUR NEXT CHAPTER</p><h2>Your ambition.<br>Our technology.</h2><p>Start with a conversation. We’ll help you find the right way forward.</p></div>'+button('Discuss your project')+'</div></section>'
 def form():
@@ -57,6 +58,13 @@ CONTENT={
 }
 NAV=[('index.html','Home'),('about.html','About'),('services.html','Services'),('solutions.html','Solutions'),('portfolio.html','Portfolio'),('contact.html','Contact')]
 for file,(title,description,body) in CONTENT.items():
+ body=re.sub(r'<div class="work-grid">.*?</div></article></div>', '<div class="work-grid" data-portfolio'+(' data-featured="true"' if file=='index.html' else '')+' aria-busy="true"><p class="content-status content-loading" role="status">Loading portfolio…</p></div>',body,flags=re.DOTALL)
+ # The old detail markup remains only as reviewed seed input, not public content.
+ body=re.sub(r'<section class="section wrap service-details">.*?</section>', '<section class="section wrap service-details" data-service-detail hidden></section>',body,flags=re.DOTALL)
+ body=re.sub(r'<select id="service" name="service".*?</select>', '<select id="service" name="service" required disabled aria-describedby="service-error"><option value="">Loading services…</option></select>',body,flags=re.DOTALL)
+ body=body.replace('SELECTED DESIGN EXPLORATIONS','FEATURED WORK').replace('Original illustrative concepts, clearly presented as design explorations rather than client case studies.','Explore published projects and clearly labeled design concepts.').replace('View all concepts','View portfolio')
+ if file=='portfolio.html':
+  body=body.replace('PORTFOLIO / DESIGN CONCEPTS','OUR PORTFOLIO').replace('These original visual explorations show possible directions for digital experiences. They are concepts, not delivered client projects or live products.','Explore our published work and digital explorations. Any demo or concept is clearly labeled.')
  if file=='index.html':
   body=body.replace('<h1>Grow Your<br>Business With<br><span>Technology.</span></h1>', '<h1 class="hero-title"><span class="title-line">Grow Your</span> <span class="title-line">Business With</span> <span class="title-line title-accent">Technology.</span></h1>')
   lines=[]
@@ -85,6 +93,8 @@ for file,(title,description,body) in CONTENT.items():
  footer='<footer class="site-footer"><div class="wrap footer-grid"><div class="footer-brand"><a class="brand" href="index.html"><img src="assets/images/clarigence-logo.png" width="2382" height="519" alt="Clarigence.in" loading="lazy"></a><p>Grow Your Business With Technology.</p><p>Practical digital solutions for your presence, your customers and your next stage of growth.</p><div class="social-links"><a href="https://www.instagram.com/clarigence.in/" target="_blank" rel="noopener noreferrer">Instagram <span class="sr-only">(opens in a new tab)</span> ↗</a><a href="https://wa.me/918459179752" target="_blank" rel="noopener noreferrer">WhatsApp <span class="sr-only">(opens in a new tab)</span> ↗</a></div></div><div class="footer-column"><h3>Explore</h3>'+''.join(f'<a href="{href}">{label}</a>' for href,label in NAV)+'</div><div class="footer-column footer-services"><h3>Our services</h3>'+''.join(f'<a href="services.html#{s[0]}">{s[1]}</a>' for s in SERVICES)+'</div><div class="footer-column"><h3>Let’s connect</h3><a href="mailto:clarigence@gmail.com">clarigence@gmail.com</a><p>India</p>'+button('Discuss a project')+'</div></div><div class="wrap footer-bottom"><span>© <span data-year>2026</span> Clarigence.in. All rights reserved.</span><a href="#main">Back to top ↑</a></div></footer>'
  footer=footer.replace('<div class="social-links">', '<div class="social-links"><a href="https://www.linkedin.com/company/clarigence-in/" target="_blank" rel="noopener noreferrer">LinkedIn <span class="sr-only">(opens in a new tab)</span> ↗</a>')
  footer=footer.replace('<div class="wrap footer-grid">','<div class="wrap footer-grid"><h2 class="sr-only">Footer navigation and contact information</h2>')
+ footer=re.sub(r'(<div class="footer-column footer-services"><h3>Our services</h3>).*?(</div>)',r'\1<a href="services.html">Explore services</a>\2',footer,flags=re.DOTALL)
+ body=body.replace('services.html#','services.html?service=')
  page=f'''<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -92,7 +102,7 @@ for file,(title,description,body) in CONTENT.items():
 <meta name="theme-color" content="#075bea"><link rel="canonical" href="{canonical}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Clarigence.in"><meta property="og:title" content="{escape(title)}"><meta property="og:description" content="{escape(description)}"><meta property="og:url" content="{canonical}"><meta property="og:image" content="https://www.clarigence.in/assets/images/clarigence-logo.png"><meta property="og:image:alt" content="Clarigence.in logo"><meta name="twitter:card" content="summary">
 <link rel="icon" href="favicon.ico"><link rel="icon" type="image/png" sizes="32x32" href="assets/favicons/favicon-32.png">
-<link rel="stylesheet" href="styles.css"><script src="api-config.js" defer></script><script src="script.js" defer></script>
+<link rel="stylesheet" href="styles.css"><script src="api-config.js" defer></script><script src="script.js" defer></script><script src="cms.js" defer></script>
 </head><body>{header}<main id="main">{body}</main>{footer}</body></html>'''
  (ROOT/file).write_text(page,encoding='utf-8')
 print('Generated all six existing public pages.')

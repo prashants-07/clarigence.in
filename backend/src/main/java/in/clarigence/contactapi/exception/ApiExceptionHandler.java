@@ -25,6 +25,21 @@ public class ApiExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
+    @ExceptionHandler(CmsValidationException.class)
+    public ResponseEntity<ApiErrorResponse> handleCmsValidation(CmsValidationException error,HttpServletRequest request){
+        return response(HttpStatus.BAD_REQUEST,error.getMessage(),request,error.getFields());
+    }
+
+    @ExceptionHandler({CmsConflictException.class,org.springframework.orm.ObjectOptimisticLockingFailureException.class})
+    public ResponseEntity<ApiErrorResponse> handleCmsConflict(Exception error,HttpServletRequest request){
+        return response(HttpStatus.CONFLICT,"This content changed in another session. Reload it before saving.",request,Map.of());
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicate(Exception error,HttpServletRequest request){
+        return response(HttpStatus.CONFLICT,"The content conflicts with an existing record. Check the slug and reload.",request,Map.of());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidation(
             MethodArgumentNotValidException exception, HttpServletRequest request) {

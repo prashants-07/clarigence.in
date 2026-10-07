@@ -66,6 +66,10 @@ document.querySelectorAll('.contact-form').forEach(form => {
     event.preventDefault();
     const button = form.querySelector('[type=submit]');
     if (button.disabled) return;
+    if (form.elements.service.disabled) {
+      notify('Services are temporarily unavailable. Please try again later or contact us by email.', 'error');
+      return;
+    }
     fields.forEach(field => {
       if (field.type !== 'select-one') field.value = field.value.trim();
       setFieldError(field, isValid(field) ? '' : messages[field.name]);
@@ -119,14 +123,18 @@ document.querySelectorAll('.contact-form').forEach(form => {
 
 document.querySelectorAll('[data-year]').forEach(node => { node.textContent = new Date().getFullYear(); });
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-if ('IntersectionObserver' in window && !motionPreference.matches) {
-  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+const observed = new WeakSet();
+const observer = 'IntersectionObserver' in window ? new IntersectionObserver(entries => entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.classList.remove('reveal-pending');
       observer.unobserve(entry.target);
     }
-  }), {threshold: 0, rootMargin: '0px 0px -24px 0px'});
-  document.querySelectorAll('main > section:not(.hero):not(.page-hero), .section-heading, .service-card, .value-grid article, .work-card, .solution-card, .process-grid article, .service-detail').forEach(node => {
+  }), {threshold: 0, rootMargin: '0px 0px -24px 0px'}) : null;
+function observeMotion(root = document) {
+  if (!observer || motionPreference.matches) return;
+  root.querySelectorAll('main > section:not(.hero):not(.page-hero), .section-heading, .service-card, .value-grid article, .work-card, .solution-card, .process-grid article, .service-detail').forEach(node => {
+    if (observed.has(node)) return;
+    observed.add(node);
     node.classList.add('reveal');
     const siblings = [...node.parentElement.children].filter(child => child.matches('.service-card, article'));
     const index = siblings.indexOf(node);
@@ -134,10 +142,12 @@ if ('IntersectionObserver' in window && !motionPreference.matches) {
     if (node.getBoundingClientRect().top > window.innerHeight) node.classList.add('reveal-pending');
     observer.observe(node);
   });
-  motionPreference.addEventListener('change', event => {
+}
+window.ClarigenceMotion = Object.freeze({observe: observeMotion});
+observeMotion();
+motionPreference.addEventListener('change', event => {
     if (event.matches) {
       document.querySelectorAll('.reveal-pending').forEach(node => node.classList.remove('reveal-pending'));
-      observer.disconnect();
+      observer?.disconnect();
     }
-  });
-}
+});

@@ -12,6 +12,7 @@ const publicFiles = [
   'contact.html',
   'styles.css',
   'script.js',
+  'cms.js',
   'api-config.js',
   'sitemap.xml',
   'robots.txt',
@@ -19,7 +20,8 @@ const publicFiles = [
 ];
 
 const localApiUrl = 'http://localhost:8081/api/contact';
-const configuredApiUrl = process.env.CLARIGENCE_API_URL?.trim();
+const configuredBase = process.env.CLARIGENCE_API_BASE_URL?.trim();
+const configuredApiUrl = configuredBase ? `${configuredBase.replace(/\/$/, '')}/api/contact` : process.env.CLARIGENCE_API_URL?.trim();
 let apiUrl = localApiUrl;
 
 // Validate deployment configuration before replacing the existing output.
@@ -63,10 +65,11 @@ fs.cpSync(assetsSource, path.join(output, 'assets'), { recursive: true });
 
 const configPath = path.join(output, 'api-config.js');
 const configSource = fs.readFileSync(configPath, 'utf8');
-if (!configSource.includes(localApiUrl)) {
+const localBase = localApiUrl.replace(/\/api\/contact$/, '');
+if (!configSource.includes(localBase)) {
   throw new Error('Could not find the expected local contact endpoint in api-config.js.');
 }
-fs.writeFileSync(configPath, configSource.replace(localApiUrl, apiUrl));
+fs.writeFileSync(configPath, configSource.replace(localBase, apiUrl.replace(/\/api\/contact$/, '')));
 
 if (!configuredApiUrl) console.log('Local build: contact form uses the backend on port 8081.');
 

@@ -24,6 +24,7 @@ function showDashboard(email) {
   dashboardView.hidden = false;
   document.querySelector('#admin-email').textContent = email;
   refreshDashboard();
+  document.dispatchEvent(new Event('clarigence:admin-ready'));
 }
 
 async function loadCsrfToken() {
@@ -58,7 +59,12 @@ async function apiRequest(path, options = {}) {
     showLogin();
     throw new Error('Your session has ended. Sign in again to continue.');
   }
-  if (!response.ok) throw new Error(payload.message || 'The request could not be completed. Please try again.');
+  if (!response.ok) {
+    const error = new Error(payload.message || 'The request could not be completed. Please try again.');
+    error.fieldErrors = payload.fieldErrors || {};
+    error.status = response.status;
+    throw error;
+  }
   return payload;
 }
 
