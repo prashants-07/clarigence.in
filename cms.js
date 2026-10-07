@@ -1,6 +1,8 @@
 /* Business content is rendered as text; CMS input never becomes executable HTML. */
 (() => {
   const requests = new Map();
+  // CMS hydration shares the initial headline timeline rather than replaying it.
+  const headlineStart = document.querySelector('.title-letter')?.getAnimations()[0]?.startTime ?? performance.now();
   const api = path => {
     if (!requests.has(path)) requests.set(path, (async () => {
       const response = await fetch(`${window.CLARIGENCE_CONFIG.apiBaseUrl}${path}`, {
@@ -145,13 +147,15 @@
   };
   function heroTitle(value){
     const heading=document.querySelector('.hero-title');if(!heading)return;
-    if(heading.getAttribute('aria-label')===value.replaceAll('\n',' '))return;
+    const normalized=text=>text.replace(/\s+/g,' ').trim();
+    if(normalized(heading.getAttribute('aria-label')||'')===normalized(value))return;
+    const elapsed=Math.max(0,performance.now()-headlineStart)/1000;
     heading.setAttribute('aria-label',value.replaceAll('\n',' '));heading.replaceChildren();
     value.split('\n').forEach((line,lineIndex)=>{
       const row=node('span',`title-line${lineIndex===value.split('\n').length-1?' title-accent':''}`);row.setAttribute('aria-hidden','true');let offset=0;
       line.split(' ').forEach((word,index)=>{
         if(index)row.append(document.createTextNode(' '));const wrapper=node('span','title-word');
-        [...word].forEach((letter,i)=>{const part=node('span','title-letter',letter);part.style.setProperty('--letter-delay',`${lineIndex*.25+(offset+i)*.024}s`);wrapper.append(part);});
+        [...word].forEach((letter,i)=>{const part=node('span','title-letter',letter);part.style.setProperty('--letter-delay',`${lineIndex*.25+(offset+i)*.024-elapsed}s`);wrapper.append(part);});
         offset+=word.length;row.append(wrapper);
       });heading.append(row);
     });
