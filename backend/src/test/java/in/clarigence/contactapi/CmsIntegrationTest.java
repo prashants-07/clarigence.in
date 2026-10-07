@@ -1,6 +1,7 @@
 package in.clarigence.contactapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import in.clarigence.contactapi.repository.*;
 import in.clarigence.contactapi.service.*;
 import org.junit.jupiter.api.*;
@@ -39,11 +40,60 @@ class CmsIntegrationTest {
         mvc.perform(get("/api/services")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(10)).andExpect(jsonPath("$[0].slug").value("website-development")).andExpect(jsonPath("$[0].id").doesNotExist()).andExpect(jsonPath("$[0].version").doesNotExist());
         mvc.perform(get("/api/services/website-development")).andExpect(status().isOk()).andExpect(jsonPath("$.capabilities[0]").isNotEmpty());
         mvc.perform(get("/api/portfolio")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
-        mvc.perform(get("/api/content/business")).andExpect(status().isOk()).andExpect(jsonPath("$.phone").doesNotExist()).andExpect(jsonPath("$.version").doesNotExist());
+        mvc.perform(get("/api/content/business")).andExpect(status().isOk()).andExpect(jsonPath("$.email").value("hello@clargience.in")).andExpect(jsonPath("$.phone").doesNotExist()).andExpect(jsonPath("$.version").doesNotExist());
+        assertTrue(documents.existsById("business-email-migrated"));
         mvc.perform(get("/api/content/cms-initialized")).andExpect(status().isNotFound());
     }
     @Test void seedIsIdempotentAndDoesNotResurrectDeletedServices() throws Exception {
         initialization.initialize();assertEquals(10,services.count());services.deleteAll();initialization.initialize();assertEquals(0,services.count());
+    }
+    @Test void migratesOnlyLegacyBusinessEmailAndRunsOnce() throws Exception {
+        documents.deleteById("business-email-migrated");
+        var business=documents.findById("business").orElseThrow();
+        ObjectNode before=(ObjectNode)json.readTree(business.getContentJson());
+        before.put("email","clarigence@gmail.com");
+        before.put("tagline","A custom business tagline");
+        before.put("customSetting","Retain this setting");
+        business.setContentJson(json.writeValueAsString(before));
+        business=documents.saveAndFlush(business);
+        long versionBefore=business.getVersion();
+
+        initialization.initialize();
+
+        var migrated=documents.findById("business").orElseThrow();
+        ObjectNode expected=before.deepCopy();
+        expected.put("email","hello@clargience.in");
+        assertEquals(expected,json.readTree(migrated.getContentJson()));
+        assertEquals(versionBefore+1,migrated.getVersion());
+        assertTrue(documents.existsById("business-email-migrated"));
+
+        initialization.initialize();
+        assertEquals(expected,json.readTree(documents.findById("business").orElseThrow().getContentJson()));
+        assertEquals(versionBefore+1,documents.findById("business").orElseThrow().getVersion());
+    }
+    @Test void preservesCustomBusinessEmailOnStartup() throws Exception {
+        documents.deleteById("business-email-migrated");
+        var business=documents.findById("business").orElseThrow();
+        ObjectNode custom=(ObjectNode)json.readTree(business.getContentJson());
+        custom.put("email","team@example.org");
+        business.setContentJson(json.writeValueAsString(custom));
+        business=documents.saveAndFlush(business);
+        long versionBefore=business.getVersion();
+
+        initialization.initialize();
+
+        var unchanged=documents.findById("business").orElseThrow();
+        assertEquals(custom,json.readTree(unchanged.getContentJson()));
+        assertEquals(versionBefore,unchanged.getVersion());
+        assertTrue(documents.existsById("business-email-migrated"));
+
+        custom.put("email","clarigence@gmail.com");
+        unchanged.setContentJson(json.writeValueAsString(custom));
+        unchanged=documents.saveAndFlush(unchanged);
+        long manuallyEditedVersion=unchanged.getVersion();
+        initialization.initialize();
+        assertEquals(custom,json.readTree(documents.findById("business").orElseThrow().getContentJson()));
+        assertEquals(manuallyEditedVersion,documents.findById("business").orElseThrow().getVersion());
     }
     @Test void authenticationAndCsrfRequired() throws Exception {
         for(String kind:List.of("services","portfolio")){

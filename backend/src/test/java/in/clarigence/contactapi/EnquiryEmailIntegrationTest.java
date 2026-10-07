@@ -31,7 +31,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest(properties = {
         "clarigence.enquiry-email.enabled=true",
-        "clarigence.enquiry-email.to=clarigence@gmail.com",
+        "clarigence.enquiry-email.to=hello@clargience.in",
         "clarigence.enquiry-email.from=notifications@example.com"
 })
 @AutoConfigureMockMvc
@@ -64,11 +64,13 @@ class EnquiryEmailIntegrationTest {
 
         ArgumentCaptor<SimpleMailMessage> mail = ArgumentCaptor.forClass(SimpleMailMessage.class);
         verify(sender).send(mail.capture());
-        assertThat(mail.getValue().getTo()).containsExactly("clarigence@gmail.com");
+        assertThat(mail.getValue().getTo()).containsExactly("hello@clargience.in");
         assertThat(mail.getValue().getFrom()).isEqualTo("notifications@example.com");
         assertThat(mail.getValue().getReplyTo()).isEqualTo("taylor@example.com");
-        assertThat(mail.getValue().getText()).contains("Taylor Example", "Example Studio",
-                "Web development", "We need a new company website.", "Phone: Not provided");
+        assertThat(mail.getValue().getSubject()).startsWith("New Clarigence enquiry #");
+        assertThat(mail.getValue().getText()).contains("Name: Taylor Example", "Email: taylor@example.com",
+                "Phone: Not provided", "Company: Example Studio", "Service: Web development",
+                "Message:\nWe need a new company website.");
     }
 
     @Test

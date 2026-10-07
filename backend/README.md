@@ -207,7 +207,7 @@ Integration tests use a temporary H2 database and exercise contact submission, v
 ## Enquiry email notifications
 
 Enquiries are always saved in the admin portal. To also send notifications to
-`clarigence@gmail.com`, configure these environment variables on the backend host:
+`hello@clargience.in`, configure these environment variables on the backend host:
 
 ```text
 ENQUIRY_EMAIL_ENABLED=true
@@ -216,7 +216,7 @@ SMTP_PORT=587
 SMTP_USERNAME=clarigence@gmail.com
 SMTP_PASSWORD=<Google App Password>
 ENQUIRY_EMAIL_FROM=clarigence@gmail.com
-ENQUIRY_EMAIL_TO=clarigence@gmail.com
+ENQUIRY_EMAIL_TO=hello@clargience.in
 ```
 
 For Gmail, enable 2-Step Verification and create an App Password:
@@ -224,6 +224,10 @@ https://support.google.com/accounts/answer/185833
 Store the App Password only in the host's secret environment settings; do not put
 it in source code or use your normal Google account password. Another SMTP
 provider can be used by changing the host, username, password and sender address.
+Use a sender address authorized by the SMTP provider. The recipient address is
+independent of the sender and must be a working mailbox. If the backend host
+already has `ENQUIRY_EMAIL_TO` set, update that value: it overrides the default
+in `application.properties`.
 
 Redeploy the backend after setting these values, then submit a test enquiry and
 check both the admin portal and recipient inbox. Notifications include enquiry
