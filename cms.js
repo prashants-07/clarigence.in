@@ -26,11 +26,15 @@
       if(url.username || url.password)return '';
       if(url.origin!==location.origin && url.protocol!=='https:')return '';
       if(image && !/\.(png|jpe?g|webp|gif|avif)$/i.test(url.pathname))return '';
+      if(!image && url.origin===location.origin){
+        const pages={'/index.html':'/','/index':'/','/home':'/','/about.html':'/about','/services.html':'/services','/solutions.html':'/solutions','/portfolio.html':'/portfolio','/contact.html':'/contact'};
+        url.pathname=pages[url.pathname]||url.pathname;
+      }
       return url.href;
     } catch{return '';}
   };
   const link=(text,href,classes='text-link') => {
-    const a=node('a',classes,text);a.href=safeUrl(href)||'contact.html';return a;
+    const a=node('a',classes,text);a.href=safeUrl(href)||'/contact';return a;
   };
   const status=(container,message,state='error') => {
     container.replaceChildren(node('p',`content-status content-${state}`,message));
@@ -48,7 +52,7 @@
     img.addEventListener('error',()=>img.remove(),{once:true});return img;
   };
   const reveal=container=>window.ClarigenceMotion?.observe(container);
-  const detailHref=slug=>`services.html?service=${encodeURIComponent(slug)}`;
+  const detailHref=slug=>`/services?service=${encodeURIComponent(slug)}`;
   async function services(){
     const containers=[...document.querySelectorAll('[data-services]')];
     const select=document.querySelector('[name=service]');
@@ -114,7 +118,7 @@
     [['How we can help',s.capabilities],['Business benefits',s.benefits]].forEach(([heading,list])=>{
       if(list?.length){content.append(node('h3','',heading));const ul=node('ul','capabilities');list.forEach(value=>ul.append(node('li','',value)));content.append(ul);}
     });
-    content.append(link('Discuss this service ↗',`contact.html?service=${encodeURIComponent(s.slug)}`,'button button-primary'));
+    content.append(link('Discuss this service ↗',`/contact?service=${encodeURIComponent(s.slug)}`,'button button-primary'));
     article.append(intro,content);container.append(article);reveal(container);
   }
   async function portfolio(){
@@ -162,7 +166,7 @@
   }
   async function content(){
     const page=location.pathname.split('/').pop()||'index.html';
-    const key=page==='index.html'?'home':page.replace('.html','');
+    const key=['index.html','index','home'].includes(page)?'home':page.replace('.html','');
     await Promise.allSettled([
       api('/api/content/business').then(s=>{
         text('.footer-brand p:first-of-type',s.tagline);text('.footer-column:last-child>p',s.address);
@@ -182,7 +186,7 @@
       }),
       (key==='home'?api('/api/content/home').then(s=>{
         heroTitle(s.headline);text('.hero-lede',s.subtitle);
-        [['.hero-actions .button:first-child',s.primaryCtaText,s.primaryCtaUrl],['.hero-actions .button:last-child',s.secondaryCtaText,s.secondaryCtaUrl]].forEach(([selector,label,href])=>{const a=document.querySelector(selector);if(a){a.replaceChildren(document.createTextNode(label),node('span','','↗'));a.href=safeUrl(href)||'contact.html';}});
+        [['.hero-actions .button:first-child',s.primaryCtaText,s.primaryCtaUrl],['.hero-actions .button:last-child',s.secondaryCtaText,s.secondaryCtaUrl]].forEach(([selector,label,href])=>{const a=document.querySelector(selector);if(a){a.replaceChildren(document.createTextNode(label),node('span','','↗'));a.href=safeUrl(href)||'/contact';}});
         multiline(document.querySelector('.about-preview h2'),s.aboutHeading);text('.about-preview>div:last-child>p:not(.large-copy)',s.aboutText);
         multiline(document.querySelector('.cta-box h2'),s.ctaHeading);text('.cta-box p:not(.eyebrow)',s.ctaDescription);
       }):key==='about'?api('/api/content/about').then(s=>{

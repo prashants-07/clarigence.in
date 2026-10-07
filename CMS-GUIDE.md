@@ -13,14 +13,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\backend\start-local.ps1
 Enter the existing database password at the private prompt. Do not enable admin bootstrap again. In another terminal:
 
 ```powershell
-py -m http.server 8000
+node scripts/build-static.js
+py scripts/serve-static.py
 ```
 
 If port 8000 already has the preview server running, use that server instead of starting a second one.
 
 - Public website: http://localhost:8000/
 - Admin: http://localhost:8081/admin/
-- Dynamic service example: http://localhost:8000/services.html?service=website-development
+- Dynamic service example: http://localhost:8000/services?service=website-development
 
 ## Database additions
 

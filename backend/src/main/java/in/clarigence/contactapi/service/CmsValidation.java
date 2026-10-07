@@ -16,7 +16,7 @@ public final class CmsValidation {
             } else {
                 if(value.startsWith("//") || value.contains("..") || value.contains("%") || uri.getQuery()!=null || (image && uri.getFragment()!=null))fail(field);
                 if(image && !value.matches("/?assets/[a-zA-Z0-9_./-]+\\.(png|jpg|jpeg|webp|gif|avif)"))fail(field);
-                if(!image && !value.matches("(?:[a-zA-Z0-9/_-]+\\.html)?(?:#[a-zA-Z0-9_-]+)?"))fail(field);
+                if(!image && !value.matches("(?:[a-zA-Z0-9/_-]+(?:\\.html)?)?(?:#[a-zA-Z0-9_-]+)?"))fail(field);
             }
         } catch(IllegalArgumentException error){fail(field);}
     }

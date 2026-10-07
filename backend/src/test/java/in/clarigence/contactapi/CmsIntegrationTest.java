@@ -93,7 +93,7 @@ class CmsIntegrationTest {
         mvc.perform(delete(path).with(csrf())).andExpect(status().isNoContent());assertEquals(0,projects.count());
     }
     @Test @WithMockUser(roles="ADMIN") void documentsValidationAndPublicUpdates() throws Exception {
-        var document=content.get("home");Map<String,String> values=new LinkedHashMap<>(document.content());values.put("subtitle","Updated homepage content from the test database.");
+        var document=content.get("home");Map<String,String> values=new LinkedHashMap<>(document.content());values.put("subtitle","Updated homepage content from the test database.");values.put("primaryCtaUrl","/contact");
         mvc.perform(put("/api/admin/content/home").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(Map.of("version",document.version(),"content",values)))).andExpect(status().isOk());
         mvc.perform(get("/api/content/home")).andExpect(jsonPath("$.subtitle").value(values.get("subtitle")));
         values.put("primaryCtaUrl","javascript:alert(1)");var latest=content.get("home");

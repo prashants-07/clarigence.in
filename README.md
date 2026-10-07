@@ -39,7 +39,8 @@ In a second Windows CMD window, start the public frontend:
 
 ```cmd
 cd /d C:\Users\prash\Desktop\clarigence.in
-py -m http.server 8000
+node scripts/build-static.js
+py scripts/serve-static.py
 ```
 
 Visit http://localhost:8000. The contact form submits to the backend at http://localhost:8081/api/contact.
