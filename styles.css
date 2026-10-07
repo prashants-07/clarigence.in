@@ -14,13 +14,35 @@
 @keyframes menu-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 @media(max-width:600px){.wrap{width:calc(100% - 36px)}.header-inner{gap:12px;height:74px}.brand img{width:145px}.header-inner>.button{padding:9px 12px;font-size:11px;gap:8px}.header-inner>.button span{font-size:15px}.menu-toggle{width:40px;height:40px;padding:10px}.nav-links{top:73px;padding:12px 18px 18px}.hero{grid-template-columns:1fr;padding-block:42px;gap:36px}.hero h1{font-size:clamp(43px,10.8vw,64px);letter-spacing:-.055em}.hero .eyebrow{font-size:9px;letter-spacing:.12em}.hero-lede{font-size:15px}.hero-actions{margin-top:25px;gap:10px}.hero-footnote{font-size:11px;margin-top:20px}.hero-visual{height:365px;max-width:480px;width:100%;margin-inline:auto;border-radius:18px}.tile-web{top:65px;left:15px}.tile-crm{top:180px;right:12px}.tile-flow{bottom:65px;left:15px}.ring-one{width:270px;height:270px}.ring-two{width:210px;height:210px}.connection-core{top:47%;width:122px;height:122px}.connection-core img{width:32px;height:32px}.connection-core strong{font-size:16px}.visual-bottom{left:18px;right:18px;bottom:15px;padding-top:10px;font-size:8px}.value-strip>.wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-block:24px}.value-strip p{grid-column:1/-1}.value-strip span{font-size:11px}.section{padding-block:52px}.section-heading{display:block;margin-bottom:30px}.section-heading>p{max-width:none;margin-top:20px;font-size:14px}.eyebrow{font-size:10px;margin-bottom:16px}.about-preview{grid-template-columns:1fr;gap:25px}.large-copy{font-size:21px}.service-grid{grid-template-columns:1fr;gap:14px}.service-card{padding:24px}.card-top{margin-bottom:23px}.value-grid{grid-template-columns:1fr;gap:25px}.value-grid article{display:grid;grid-template-columns:30px 1fr;column-gap:15px;padding-top:20px}.value-mark{grid-row:1/3;margin:0;font-size:25px}.value-grid p{grid-column:2}.value-grid h3{font-size:19px}.process-grid{grid-template-columns:1fr 1fr;gap:28px 22px}.step-number{font-size:25px;padding-bottom:14px;margin-bottom:17px}.process-grid h3{font-size:17px}.process-grid p{font-size:12px}.solution-grid,.work-grid{grid-template-columns:1fr;gap:18px}.solution-card{padding:26px}.solution-card h3{font-size:24px}.project-art{height:250px;padding:28px}.mock-window{height:220px}.mock-body{padding:20px}.mock-body strong{font-size:23px}.project-copy{padding:24px}.project-copy h3{font-size:21px}.cta-section{padding-block:45px 0}.cta-box{padding:30px 25px;flex-direction:column;align-items:start;gap:25px;border-radius:18px}.cta-box h2{font-size:34px}.page-hero{padding-block:45px 35px}.page-hero h1{font-size:clamp(40px,10vw,56px)}.service-detail{grid-template-columns:1fr;gap:28px;padding-block:42px}.service-detail h2{font-size:30px}.service-detail h3{font-size:20px}.contact-layout{grid-template-columns:1fr;gap:32px}.contact-info{margin-top:20px}.contact-form{padding:23px 20px}.contact-form h2{font-size:26px}.form-grid{grid-template-columns:1fr}.site-footer{padding-top:42px}.footer-grid{gap:30px 20px;padding-bottom:35px}.footer-brand{grid-column:1/-1}.footer-grid>.footer-column:last-child{grid-column:1/-1}.footer-brand p{max-width:330px}.footer-column>a{font-size:11px}.footer-bottom{gap:20px;align-items:start;font-size:10px}.footer-bottom>a{white-space:nowrap}}
 @media(max-width:350px){.header-inner{gap:8px}.brand img{width:122px}.header-inner>.button{padding:8px 10px}.hero-actions .button{width:100%;justify-content:space-between}.visual-tile{padding:9px}.visual-tile small{font-size:7px}.tile-crm{right:7px}.tile-web,.tile-flow{left:9px}.footer-grid{gap:26px 12px}.contact-info a{font-size:14px}}
-.hero .hero-title .title-line{display:block;color:var(--ink);animation:title-arrive .85s cubic-bezier(.16,1,.3,1) both;transform-origin:left center}
-.hero .hero-title .title-line:nth-child(1){animation-delay:.08s}
-.hero .hero-title .title-line:nth-child(2){animation-delay:.24s}
-.hero .hero-title .title-accent{color:var(--blue);animation-delay:.4s}
-@supports (background-clip:text){.hero .hero-title .title-accent{width:fit-content;max-width:100%;background:linear-gradient(110deg,#075bea 15%,#073a99 35%,#047bab 48%,#075bea 62%,#075bea 85%);background-size:240% 100%;background-position:100% center;background-clip:text;-webkit-background-clip:text;color:transparent;animation:title-arrive .85s cubic-bezier(.16,1,.3,1) .4s both,title-shimmer 3.8s ease-in-out 1s both}}
+.hero .hero-title{letter-spacing:-.025em}
+.hero .hero-title .title-line{display:block;color:var(--ink)}
+.title-word{display:inline-block;white-space:nowrap}
+.title-letter{display:inline-block;animation:title-arrive .65s cubic-bezier(.16,1,.3,1) var(--letter-delay,0s) both}
+.hero .hero-title .title-accent{color:var(--blue)}
 @keyframes title-arrive{from{opacity:0;transform:translateY(20px) scale(.985);filter:blur(5px)}to{opacity:1;transform:none;filter:blur(0)}}
-@keyframes title-shimmer{from{background-position:0% center}to{background-position:100% center}}
+.reveal{transition-delay:var(--reveal-delay,0ms)}
+.hero-visual{animation:panel-drift 10s ease-in-out infinite}
+.connection-core{animation:core-drift 8s ease-in-out infinite}
+.connection-ring{animation:ring-drift 24s linear infinite}
+.ring-two{animation-direction:reverse;animation-duration:32s}
+.about-artwork{position:relative;height:230px;max-width:380px;margin-top:32px;border:1px solid var(--line);border-radius:18px;background:radial-gradient(ellipse,#dceaff,#f4f7fc);overflow:hidden;display:grid;place-items:center}
+.artwork-orbit{position:absolute;width:170px;height:170px;border:1px dashed #94b6e8;border-radius:35%;animation:artwork-turn 28s linear infinite}
+.orbit-offset{width:210px;height:160px;animation-direction:reverse}
+.artwork-symbol{display:grid;place-items:center;background:#fff;border-radius:18px;width:80px;height:80px;color:var(--blue);box-shadow:0 12px 30px #075bea15;animation:float 7s ease-in-out infinite}
+.artwork-symbol svg{width:42px;height:42px}
+.artwork-label{position:absolute;bottom:18px;font-size:11px;letter-spacing:.07em;color:var(--muted)}
+.service-detail .icon{animation:float 8s ease-in-out infinite}
+.icon svg,.card-link>span,.button>span{transition:transform .25s ease}
+.service-card:hover .icon svg,.service-card:focus-visible .icon svg{transform:translateY(-2px) rotate(-5deg)}
+.service-card:hover .card-link>span,.button:hover>span{transform:translate(2px,-2px)}
+.solution-card{transition:transform .25s,box-shadow .25s}.solution-card:hover{transform:translateY(-4px);box-shadow:0 15px 30px #1024480c}
+.project-copy summary{transition:color .2s,background .2s,padding .2s;border-radius:5px}.project-copy summary:hover{background:#edf4ff;padding-left:7px}.project-copy details[open] summary{color:var(--ink)}
+.nav-links a:before{content:'';position:absolute;left:0;bottom:5px;width:100%;height:2px;background:var(--blue);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}.nav-links a:hover:before,.nav-links a:focus-visible:before{transform:scaleX(1)}
+@media(max-width:900px){.nav-links a:before{left:12px;width:25px}}
+@keyframes panel-drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes core-drift{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,calc(-50% - 4px))}}
+@keyframes ring-drift{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes artwork-turn{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 /* Give the illustrated capabilities their own space on compact screens. */
 @media(min-width:601px) and (max-width:900px){.hero{grid-template-columns:1fr;gap:38px}.hero-copy{max-width:620px}.hero-visual{width:100%;max-width:600px;margin-inline:auto}}
 @media(max-width:600px){.hero-visual{height:440px}.connection-core{top:43%}.connection-ring{top:43%}.tile-crm{top:270px;right:12px}.tile-flow{bottom:55px}}

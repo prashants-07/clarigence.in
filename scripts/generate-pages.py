@@ -59,6 +59,20 @@ NAV=[('index.html','Home'),('about.html','About'),('services.html','Services'),(
 for file,(title,description,body) in CONTENT.items():
  if file=='index.html':
   body=body.replace('<h1>Grow Your<br>Business With<br><span>Technology.</span></h1>', '<h1 class="hero-title"><span class="title-line">Grow Your</span> <span class="title-line">Business With</span> <span class="title-line title-accent">Technology.</span></h1>')
+  lines=[]
+  for line_number,line in enumerate(['Grow Your','Business With','Technology.']):
+   letters=[]
+   offset=0
+   for word in line.split(' '):
+    characters=''.join(f'<span class="title-letter" style="--letter-delay:{line_number*.68+(offset+i)*.035:.3f}s">{escape(character)}</span>' for i,character in enumerate(word))
+    letters.append(f'<span class="title-word">{characters}</span>')
+    offset+=len(word)+1
+   lines.append(f'<span class="title-line {"title-accent" if line_number==2 else ""}" aria-hidden="true">'+ ' '.join(letters)+'</span>')
+  start=body.index('<h1 class="hero-title">')
+  end=body.index('</h1>',start)+len('</h1>')
+  body=body[:start]+'<h1 class="hero-title" aria-label="Grow Your Business With Technology.">'+''.join(lines)+'</h1>'+body[end:]
+ if file=='about.html':
+  body=body.replace('<h2>Your goals set<br>our direction.</h2>', '<h2>Your goals set<br>our direction.</h2><div class="about-artwork" aria-hidden="true"><div class="artwork-orbit"></div><div class="artwork-orbit orbit-offset"></div><span class="artwork-symbol">'+icon('flow')+'</span><span class="artwork-label">Ideas → useful solutions</span></div>')
  if file=='services.html':
   body=body.replace('<div class="service-grid">','<h2 class="sr-only">Explore our services</h2><div class="service-grid">',1)
  if file=='solutions.html':

@@ -125,9 +125,12 @@ if ('IntersectionObserver' in window && !motionPreference.matches) {
       entry.target.classList.remove('reveal-pending');
       observer.unobserve(entry.target);
     }
-  }), {threshold: 0.05});
-  document.querySelectorAll('.service-card, .value-grid article, .work-card, .solution-card, .process-grid article').forEach(node => {
+  }), {threshold: 0, rootMargin: '0px 0px -24px 0px'});
+  document.querySelectorAll('main > section:not(.hero):not(.page-hero), .section-heading, .service-card, .value-grid article, .work-card, .solution-card, .process-grid article, .service-detail').forEach(node => {
     node.classList.add('reveal');
+    const siblings = [...node.parentElement.children].filter(child => child.matches('.service-card, article'));
+    const index = siblings.indexOf(node);
+    if (index >= 0) node.style.setProperty('--reveal-delay', `${(index % 3) * 65}ms`);
     if (node.getBoundingClientRect().top > window.innerHeight) node.classList.add('reveal-pending');
     observer.observe(node);
   });
