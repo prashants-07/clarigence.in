@@ -17,7 +17,7 @@
 .hero .hero-title{letter-spacing:-.025em}
 .hero .hero-title .title-line{display:block;color:var(--ink)}
 .title-word{display:inline-block;white-space:nowrap}
-.title-letter{display:inline-block;animation:title-arrive .65s cubic-bezier(.16,1,.3,1) var(--letter-delay,0s) both}
+.title-letter{display:inline-block;animation:title-arrive .48s cubic-bezier(.16,1,.3,1) var(--letter-delay,0s) both}
 .hero .hero-title .title-accent{color:var(--blue)}
 @keyframes title-arrive{from{opacity:0;transform:translateY(20px) scale(.985);filter:blur(5px)}to{opacity:1;transform:none;filter:blur(0)}}
 .reveal{transition-delay:var(--reveal-delay,0ms)}
