@@ -1,121 +1,140 @@
 const menuButton = document.querySelector('.menu-toggle');
 const nav = document.querySelector('.nav-links');
-
 if (menuButton && nav) {
-  const navId = 'primary-navigation';
-  nav.id = navId;
-  menuButton.setAttribute('aria-controls', navId);
-
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  nav.querySelectorAll('a[href]').forEach((link) => {
-    const linkPage = link.getAttribute('href').split('#')[0];
-    if (linkPage === currentPage) link.setAttribute('aria-current', 'page');
-  });
-
   const closeMenu = (returnFocus = false) => {
     nav.classList.remove('open');
     menuButton.setAttribute('aria-expanded', 'false');
     menuButton.setAttribute('aria-label', 'Open navigation');
     if (returnFocus) menuButton.focus();
   };
-
   menuButton.addEventListener('click', () => {
-    const isOpen = nav.classList.toggle('open');
-    menuButton.setAttribute('aria-expanded', String(isOpen));
-    menuButton.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
+    const open = nav.classList.toggle('open');
+    menuButton.setAttribute('aria-expanded', String(open));
+    menuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
   });
-
-  nav.addEventListener('click', (event) => {
-    if (event.target.closest('a')) {
-      closeMenu();
-    }
-  });
-
-  document.addEventListener('keydown', (event) => {
+  nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
+  document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && nav.classList.contains('open')) closeMenu(true);
   });
-
-  document.addEventListener('click', (event) => {
-    if (nav.classList.contains('open') && !nav.contains(event.target) && !menuButton.contains(event.target)) closeMenu();
+  document.addEventListener('click', event => {
+    if (!nav.contains(event.target) && !menuButton.contains(event.target)) closeMenu();
   });
-
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 650 && nav.classList.contains('open')) closeMenu();
+  document.addEventListener('focusin', event => {
+    if (!nav.contains(event.target) && !menuButton.contains(event.target)) closeMenu();
   });
+  window.addEventListener('resize', () => { if (window.innerWidth > 900) closeMenu(); });
 }
 
-const contactForm = document.querySelector('.contact-form[data-api-url]');
-if (contactForm) {
-  contactForm.addEventListener('submit', async (event) => {
+document.querySelectorAll('.contact-form').forEach(form => {
+  const status = form.querySelector('#form-status');
+  const fields = [...form.querySelectorAll('[name]')];
+  const messages = {
+    name: 'Enter your name (up to 120 characters).',
+    email: 'Enter a valid email address (up to 254 characters).',
+    phone: 'Use 7–30 characters: digits, spaces, +, parentheses, dots or hyphens.',
+    company: 'Use up to 160 characters for the company name.',
+    service: 'Please choose a service.',
+    message: 'Enter a message between 10 and 5,000 characters.'
+  };
+  const setFieldError = (field, message = '') => {
+    const error = form.querySelector(`#${field.name}-error`);
+    if (error) error.textContent = message;
+    if (message) field.setAttribute('aria-invalid', 'true');
+    else field.removeAttribute('aria-invalid');
+  };
+  const notify = (message, state) => {
+    status.textContent = message;
+    status.dataset.state = state;
+  };
+  const isValid = field => {
+    const min = Number(field.getAttribute('minlength') || 0);
+    const max = Number(field.getAttribute('maxlength') || Infinity);
+    return field.checkValidity() && field.value.length >= min && field.value.length <= max;
+  };
+  fields.forEach(field => {
+    field.addEventListener('input', () => setFieldError(field));
+    field.addEventListener('change', () => setFieldError(field));
+  });
+  const requested = new URLSearchParams(location.search).get('service');
+  if (requested) {
+    const match = [...form.elements.service.options].find(option =>
+      option.textContent.toLowerCase().replaceAll(' ', '-') === requested);
+    if (match) form.elements.service.value = match.value;
+  }
+  form.noValidate = true;
+  form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (!contactForm.reportValidity()) return;
-
-    const submitButton = contactForm.querySelector('[type="submit"]');
-    const statusMessage = contactForm.querySelector('#form-status');
-    const originalButton = submitButton.innerHTML;
-    const payload = Object.fromEntries(new FormData(contactForm).entries());
-
-    contactForm.querySelectorAll('[name]').forEach((field) => field.removeAttribute('aria-invalid'));
-    submitButton.disabled = true;
-    submitButton.textContent = 'Sending…';
-    statusMessage.textContent = 'Sending your enquiry securely…';
-    statusMessage.dataset.state = 'pending';
-
+    const button = form.querySelector('[type=submit]');
+    if (button.disabled) return;
+    fields.forEach(field => {
+      if (field.type !== 'select-one') field.value = field.value.trim();
+      setFieldError(field, isValid(field) ? '' : messages[field.name]);
+    });
+    const invalid = fields.find(field => !isValid(field));
+    if (invalid) {
+      notify('Please check the highlighted fields.', 'error');
+      invalid.focus();
+      return;
+    }
+    const original = button.innerHTML;
+    button.disabled = true;
+    button.textContent = 'Sending enquiry…';
+    form.setAttribute('aria-busy', 'true');
+    notify('Sending your enquiry…', 'pending');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
     try {
-      const response = await fetch(contactForm.dataset.apiUrl, {
+      const endpoint = window.CLARIGENCE_CONFIG?.contactApiUrl;
+      if (!endpoint) throw new Error('Missing contact configuration');
+      const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        signal: controller.signal
       });
-      const result = await response.json().catch(() => ({}));
-
+      const result = await response.json().catch(() => null);
       if (!response.ok) {
-        const fields = Object.keys(result.fieldErrors || {});
-        fields.forEach((name) => {
-          const field = contactForm.elements.namedItem(name);
-          if (field) field.setAttribute('aria-invalid', 'true');
-        });
-        statusMessage.textContent = fields.length
-          ? `Please check: ${fields.join(', ')}.`
-          : (result.message || 'We could not send your enquiry. Please try again.');
-        statusMessage.dataset.state = 'error';
-        if (fields.length) contactForm.elements.namedItem(fields[0])?.focus();
+        const names = response.status === 400
+          ? fields.filter(field => Object.hasOwn(result?.fieldErrors || {}, field.name)) : [];
+        names.forEach(field => setFieldError(field, messages[field.name]));
+        notify(names.length ? 'Please check the highlighted fields.' :
+          'We couldn’t send your enquiry right now. Please try again or email clarigence@gmail.com.', 'error');
+        if (names.length) names[0].focus();
         return;
       }
-
-      contactForm.reset();
-      statusMessage.textContent = result.message || 'Thank you. Your enquiry has been sent.';
-      statusMessage.dataset.state = 'success';
+      if (response.status !== 201 || !result) throw new Error('Unexpected response');
+      form.reset();
+      notify('Thank you. Your enquiry has been sent. We’ll be in touch to discuss your project.', 'success');
+      status.focus();
     } catch {
-      statusMessage.textContent = 'We could not reach the enquiry service. Please try again or email hello@clarigence.in.';
-      statusMessage.dataset.state = 'error';
+      notify('We couldn’t confirm your enquiry. Please try again later or email clarigence@gmail.com.', 'error');
     } finally {
-      submitButton.disabled = false;
-      submitButton.innerHTML = originalButton;
+      clearTimeout(timeout);
+      button.disabled = false;
+      button.innerHTML = original;
+      form.removeAttribute('aria-busy');
     }
   });
-}
-
-document.querySelectorAll('[data-year]').forEach((node) => {
-  node.textContent = new Date().getFullYear();
 });
 
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if ('IntersectionObserver' in window && !reduceMotion) {
-  const revealTargets = document.querySelectorAll(
-    'main > section, .service-card, .process-step, .work-card, .portfolio-item, .solution-card, .value-grid article'
-  );
-  revealTargets.forEach((node) => node.classList.add('reveal'));
-  document.documentElement.classList.add('reveal-ready');
-
-  const revealObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12 });
-
-  revealTargets.forEach((node) => revealObserver.observe(node));
+document.querySelectorAll('[data-year]').forEach(node => { node.textContent = new Date().getFullYear(); });
+const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+if ('IntersectionObserver' in window && !motionPreference.matches) {
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.remove('reveal-pending');
+      observer.unobserve(entry.target);
+    }
+  }), {threshold: 0.05});
+  document.querySelectorAll('.service-card, .value-grid article, .work-card, .solution-card, .process-grid article').forEach(node => {
+    node.classList.add('reveal');
+    if (node.getBoundingClientRect().top > window.innerHeight) node.classList.add('reveal-pending');
+    observer.observe(node);
+  });
+  motionPreference.addEventListener('change', event => {
+    if (event.matches) {
+      document.querySelectorAll('.reveal-pending').forEach(node => node.classList.remove('reveal-pending'));
+      observer.disconnect();
+    }
+  });
 }

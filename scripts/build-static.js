@@ -12,6 +12,8 @@ const publicFiles = [
   'contact.html',
   'styles.css',
   'script.js',
+  'api-config.js',
+  'sitemap.xml',
   'robots.txt',
   'favicon.ico',
 ];
@@ -59,12 +61,12 @@ if (!fs.existsSync(assetsSource)) {
 }
 fs.cpSync(assetsSource, path.join(output, 'assets'), { recursive: true });
 
-const contactPath = path.join(output, 'contact.html');
-const contactHtml = fs.readFileSync(contactPath, 'utf8');
-if (!contactHtml.includes(localApiUrl)) {
-  throw new Error('Could not find the expected local contact API URL in contact.html.');
+const configPath = path.join(output, 'api-config.js');
+const configSource = fs.readFileSync(configPath, 'utf8');
+if (!configSource.includes(localApiUrl)) {
+  throw new Error('Could not find the expected local contact endpoint in api-config.js.');
 }
-fs.writeFileSync(contactPath, contactHtml.replace(localApiUrl, apiUrl));
+fs.writeFileSync(configPath, configSource.replace(localApiUrl, apiUrl));
 
 if (!configuredApiUrl) console.log('Local build: contact form uses the backend on port 8081.');
 

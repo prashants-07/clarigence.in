@@ -25,7 +25,7 @@ The first run links this folder to your Vercel project and asks for deployment s
 
 ### Contact form and admin dashboard
 
-The contact form currently points to the local API at `http://localhost:8081/api/contact`. For a live site, deploy the Spring Boot backend and MySQL database to a Java-capable host separately, then configure the Vercel project environment variable `CLARIGENCE_API_URL` as the full HTTPS endpoint ending in `/api/contact` (for example, `https://your-api-domain.example/api/contact`) and redeploy. The build validates this URL and applies it only to the generated `dist/contact.html`; the local website source remains unchanged. Vercel builds fail if this variable is missing, preventing a deployment that sends enquiries to a visitor's localhost. Configure the backend CORS allowlist to include your Vercel domain. The admin dashboard is served by the backend, so it also becomes available at the backend host rather than as a standalone Vercel page.
+Both homepage and contact-page enquiry forms use the single endpoint in `api-config.js`: `http://localhost:8081/api/contact`. For a live site, configure the Vercel environment variable `CLARIGENCE_API_URL` as your deployed HTTPS endpoint ending in `/api/contact` and redeploy. The existing build validates this URL and replaces it only in `dist/api-config.js`; local source stays unchanged. Vercel builds fail if this variable is missing. Configure the backend CORS allowlist with your public frontend origin. The admin dashboard remains served by the backend.
 
 Vercel’s direct CLI deployment avoids a GitHub push, while `.gitignore` excludes Maven’s regenerated `target` directory if you later put the project in Git. If the 57 MB JAR was already committed to a different Git repository’s history, ignoring it now will not remove the old commit; that Git history would need cleanup before a GitHub push.
 
@@ -41,3 +41,13 @@ py -m http.server 8000
 ```
 
 Visit http://localhost:8000. The contact form submits to the backend at http://localhost:8081/api/contact.
+
+## Public design and content
+
+The six existing public HTML pages share a lightweight stylesheet and JavaScript, with no runtime framework or added production dependencies. Existing logo and favicon assets are preserved. Service details live at anchors on `services.html`; links from those details preselect a service on the contact page. Portfolio items are explicitly labeled illustrative concepts.
+
+Edit shared page content in `scripts/generate-pages.py`, then regenerate the six HTML pages with `py scripts/generate-pages.py`. CSS and JavaScript remain independently editable. This optional authoring script is not needed to serve or deploy the website.
+
+Build locally with `node scripts/build-static.js`. Canonicals and `sitemap.xml` use `https://www.clarigence.in/`; update these together if the primary public domain changes. Keep the existing backend deployment, MySQL configuration and admin credentials unchanged.
+
+Browser checks: `node scripts/verify-frontend.cjs` requires Playwright in the ignored `.qa-tools` directory and the frontend running on port 8000. This is a testing tool only. Results and screenshots are written to ignored `artifacts/qa/`.

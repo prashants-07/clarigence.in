@@ -4,6 +4,9 @@
 # Local Vercel state and generated static output
 .vercel/
 dist/
+.qa-tools/
+artifacts/qa/
+__pycache__/
 
 # Local environment files and editor/OS files
 .env
