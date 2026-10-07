@@ -125,11 +125,11 @@ document.querySelectorAll('[data-year]').forEach(node => { node.textContent = ne
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
 const observed = new WeakSet();
 const observer = 'IntersectionObserver' in window ? new IntersectionObserver(entries => entries.forEach(entry => {
-    if (entry.isIntersecting) {
+    if (entry.isIntersecting && entry.intersectionRatio >= .08) {
       entry.target.classList.remove('reveal-pending');
       observer.unobserve(entry.target);
     }
-  }), {threshold: 0, rootMargin: '0px 0px -24px 0px'}) : null;
+  }), {threshold: .08, rootMargin: '0px 0px -32px 0px'}) : null;
 function observeMotion(root = document) {
   if (!observer || motionPreference.matches) return;
   root.querySelectorAll('main > section:not(.hero):not(.page-hero), .section-heading, .service-card, .value-grid article, .work-card, .solution-card, .process-grid article, .service-detail').forEach(node => {
@@ -138,8 +138,8 @@ function observeMotion(root = document) {
     node.classList.add('reveal');
     const siblings = [...node.parentElement.children].filter(child => child.matches('.service-card, article'));
     const index = siblings.indexOf(node);
-    if (index >= 0) node.style.setProperty('--reveal-delay', `${(index % 3) * 65}ms`);
-    if (node.getBoundingClientRect().top > window.innerHeight) node.classList.add('reveal-pending');
+    if (index >= 0) node.style.setProperty('--reveal-delay', `${Math.min(index * 65, 260)}ms`);
+    node.classList.add('reveal-pending');
     observer.observe(node);
   });
 }

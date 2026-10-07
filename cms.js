@@ -145,13 +145,14 @@
   };
   function heroTitle(value){
     const heading=document.querySelector('.hero-title');if(!heading)return;
+    if(heading.getAttribute('aria-label')===value.replaceAll('\n',' '))return;
     heading.setAttribute('aria-label',value.replaceAll('\n',' '));heading.replaceChildren();
     value.split('\n').forEach((line,lineIndex)=>{
       const row=node('span',`title-line${lineIndex===value.split('\n').length-1?' title-accent':''}`);row.setAttribute('aria-hidden','true');let offset=0;
       line.split(' ').forEach((word,index)=>{
         if(index)row.append(document.createTextNode(' '));const wrapper=node('span','title-word');
-        [...word].forEach((letter,i)=>{const part=node('span','title-letter',letter);part.style.setProperty('--letter-delay',`${lineIndex*.48+(offset+i)*.025}s`);wrapper.append(part);});
-        offset+=word.length+1;row.append(wrapper);
+        [...word].forEach((letter,i)=>{const part=node('span','title-letter',letter);part.style.setProperty('--letter-delay',`${lineIndex*.25+(offset+i)*.024}s`);wrapper.append(part);});
+        offset+=word.length;row.append(wrapper);
       });heading.append(row);
     });
   }

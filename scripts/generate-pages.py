@@ -72,9 +72,9 @@ for file,(title,description,body) in CONTENT.items():
    letters=[]
    offset=0
    for word in line.split(' '):
-    characters=''.join(f'<span class="title-letter" style="--letter-delay:{line_number*.48+(offset+i)*.025:.3f}s">{escape(character)}</span>' for i,character in enumerate(word))
+    characters=''.join(f'<span class="title-letter" style="--letter-delay:{line_number*.25+(offset+i)*.024:.3f}s">{escape(character)}</span>' for i,character in enumerate(word))
     letters.append(f'<span class="title-word">{characters}</span>')
-    offset+=len(word)+1
+    offset+=len(word)
    lines.append(f'<span class="title-line {"title-accent" if line_number==2 else ""}" aria-hidden="true">'+ ' '.join(letters)+'</span>')
   start=body.index('<h1 class="hero-title">')
   end=body.index('</h1>',start)+len('</h1>')
