@@ -57,6 +57,8 @@ CONTENT={
 }
 NAV=[('index.html','Home'),('about.html','About'),('services.html','Services'),('solutions.html','Solutions'),('portfolio.html','Portfolio'),('contact.html','Contact')]
 for file,(title,description,body) in CONTENT.items():
+ if file=='index.html':
+  body=body.replace('<h1>Grow Your<br>Business With<br><span>Technology.</span></h1>', '<h1 class="hero-title"><span class="title-line">Grow Your</span> <span class="title-line">Business With</span> <span class="title-line title-accent">Technology.</span></h1>')
  if file=='services.html':
   body=body.replace('<div class="service-grid">','<h2 class="sr-only">Explore our services</h2><div class="service-grid">',1)
  if file=='solutions.html':
