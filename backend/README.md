@@ -206,8 +206,30 @@ mvn clean verify
 Integration tests use a temporary H2 database and exercise contact submission, validation and CORS, plus admin login, authorization, CSRF, dashboard listing/filtering, details, status changes, deletion, and logout. They do not use MySQL credentials or add test records to your MySQL database.
 ## Enquiry email notifications
 
+### Resend HTTPS on Railway Trial / Hobby
+
+Verify the sender domain in Resend and create a Sending access API key restricted
+to that domain. Keep existing mailbox MX records. Set these private backend
+variables, then deploy the updated backend code:
+
+```text
+ENQUIRY_EMAIL_ENABLED=true
+ENQUIRY_EMAIL_PROVIDER=resend
+RESEND_API_KEY=<private Resend API key>
+ENQUIRY_EMAIL_FROM=enquiries@clarigence.in
+ENQUIRY_EMAIL_TO=hello@clarigence.in
+```
+
+The From domain must be the actual verified Resend domain. If you verified
+`notify.clarigence.in`, use `enquiries@notify.clarigence.in` instead.
+No SMTP credentials are needed for Resend. Delivery uses HTTPS after the enquiry
+commits, with the visitor as Reply-To. Failures leave the enquiry saved and log
+only a safe diagnostic; check Resend delivery logs for the detailed reason.
+
+### SMTP on hosts that allow it
+
 Enquiries are always saved in the admin portal. To also send notifications to
-`hello@clargience.in`, configure these environment variables on the backend host:
+`hello@clarigence.in`, configure these environment variables on the backend host:
 
 ```text
 ENQUIRY_EMAIL_ENABLED=true
@@ -216,7 +238,7 @@ SMTP_PORT=587
 SMTP_USERNAME=clarigence@gmail.com
 SMTP_PASSWORD=<Google App Password>
 ENQUIRY_EMAIL_FROM=clarigence@gmail.com
-ENQUIRY_EMAIL_TO=hello@clargience.in
+ENQUIRY_EMAIL_TO=hello@clarigence.in
 ```
 
 For Gmail, enable 2-Step Verification and create an App Password:

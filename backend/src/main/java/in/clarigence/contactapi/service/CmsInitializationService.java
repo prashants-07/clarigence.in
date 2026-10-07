@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CmsInitializationService {
-    private static final String BUSINESS_EMAIL_MIGRATION="business-email-migrated";
+    private static final String BUSINESS_EMAIL_MIGRATION="business-email-corrected-v2";
     private final WebsiteServiceRepository services;
     private final SiteDocumentRepository documents;
     private final CmsService cms;
@@ -40,8 +40,9 @@ public class CmsInitializationService {
         JsonNode content=json.readTree(business.getContentJson());
         if(!(content instanceof ObjectNode values))throw new IllegalStateException("Invalid stored business content");
         JsonNode email=values.get("email");
-        if(email==null||!email.isTextual()||!"clarigence@gmail.com".equals(email.textValue()))return;
-        values.put("email","hello@clargience.in");
+        if(email==null||!email.isTextual()||!("clarigence@gmail.com".equals(email.textValue())
+                ||"hello@clargience.in".equals(email.textValue())))return;
+        values.put("email","hello@clarigence.in");
         business.setContentJson(json.writeValueAsString(values));
         documents.saveAndFlush(business);
     }

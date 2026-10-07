@@ -23,7 +23,13 @@ public class EmailConfigurationLogging {
     public void logConfiguration() {
         boolean enabled = environment.getProperty("clarigence.enquiry-email.enabled", Boolean.class, false);
         if (!enabled) {
-            log.warn("Enquiry email notifications disabled. Set ENQUIRY_EMAIL_ENABLED=true and configure SMTP on the backend host.");
+            log.warn("Enquiry email notifications disabled. Set ENQUIRY_EMAIL_ENABLED=true and configure an email provider on the backend host.");
+            return;
+        }
+        if ("resend".equals(environment.getProperty("clarigence.enquiry-email.provider", "smtp"))) {
+            log.info("Resend HTTPS configuration loaded: apiKeyConfigured={}, senderConfigured={}, recipientConfigured={}",
+                    configured("clarigence.enquiry-email.resend-api-key"), configured("clarigence.enquiry-email.from"),
+                    configured("clarigence.enquiry-email.to"));
             return;
         }
         log.info("SMTP configuration loaded: host={}, port={}, auth={}, STARTTLS={}, STARTTLS-required={}, SSL={}, "

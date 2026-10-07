@@ -59,7 +59,7 @@ public class EnquiryEmailNotification {
                     contact.getEmail(), optional(contact.getPhone()), optional(contact.getCompany()),
                     contact.getService(), contact.getMessage()));
             sender.send(mail);
-            log.info("Email sent successfully for enquiry {} (SMTP server accepted the message).", contact.getId());
+            log.info("Email sent successfully for enquiry {} (email provider accepted the message).", contact.getId());
         } catch (RuntimeException exception) {
             // Avoid logging enquiry contents or SMTP credentials.
             log.error("Email sending failed for saved enquiry {}: type={}, diagnostic={}. Enquiry remains saved.",

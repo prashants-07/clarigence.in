@@ -102,7 +102,7 @@ document.querySelectorAll('.contact-form').forEach(form => {
           ? fields.filter(field => Object.hasOwn(result?.fieldErrors || {}, field.name)) : [];
         names.forEach(field => setFieldError(field, messages[field.name]));
         notify(names.length ? 'Please check the highlighted fields.' :
-          'We couldn’t send your enquiry right now. Please try again or email hello@clargience.in.', 'error');
+          'We couldn’t send your enquiry right now. Please try again or email hello@clarigence.in.', 'error');
         if (names.length) names[0].focus();
         return;
       }
@@ -111,7 +111,7 @@ document.querySelectorAll('.contact-form').forEach(form => {
       notify('Thank you. Your enquiry has been sent. We’ll be in touch to discuss your project.', 'success');
       status.focus();
     } catch {
-      notify('We couldn’t confirm your enquiry. Please try again later or email hello@clargience.in.', 'error');
+      notify('We couldn’t confirm your enquiry. Please try again later or email hello@clarigence.in.', 'error');
     } finally {
       clearTimeout(timeout);
       button.disabled = false;

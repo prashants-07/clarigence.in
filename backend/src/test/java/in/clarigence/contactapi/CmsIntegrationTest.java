@@ -40,15 +40,15 @@ class CmsIntegrationTest {
         mvc.perform(get("/api/services")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(10)).andExpect(jsonPath("$[0].slug").value("website-development")).andExpect(jsonPath("$[0].id").doesNotExist()).andExpect(jsonPath("$[0].version").doesNotExist());
         mvc.perform(get("/api/services/website-development")).andExpect(status().isOk()).andExpect(jsonPath("$.capabilities[0]").isNotEmpty());
         mvc.perform(get("/api/portfolio")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
-        mvc.perform(get("/api/content/business")).andExpect(status().isOk()).andExpect(jsonPath("$.email").value("hello@clargience.in")).andExpect(jsonPath("$.phone").doesNotExist()).andExpect(jsonPath("$.version").doesNotExist());
-        assertTrue(documents.existsById("business-email-migrated"));
+        mvc.perform(get("/api/content/business")).andExpect(status().isOk()).andExpect(jsonPath("$.email").value("hello@clarigence.in")).andExpect(jsonPath("$.phone").doesNotExist()).andExpect(jsonPath("$.version").doesNotExist());
+        assertTrue(documents.existsById("business-email-corrected-v2"));
         mvc.perform(get("/api/content/cms-initialized")).andExpect(status().isNotFound());
     }
     @Test void seedIsIdempotentAndDoesNotResurrectDeletedServices() throws Exception {
         initialization.initialize();assertEquals(10,services.count());services.deleteAll();initialization.initialize();assertEquals(0,services.count());
     }
     @Test void migratesOnlyLegacyBusinessEmailAndRunsOnce() throws Exception {
-        documents.deleteById("business-email-migrated");
+        documents.deleteById("business-email-corrected-v2");
         var business=documents.findById("business").orElseThrow();
         ObjectNode before=(ObjectNode)json.readTree(business.getContentJson());
         before.put("email","clarigence@gmail.com");
@@ -62,17 +62,29 @@ class CmsIntegrationTest {
 
         var migrated=documents.findById("business").orElseThrow();
         ObjectNode expected=before.deepCopy();
-        expected.put("email","hello@clargience.in");
+        expected.put("email","hello@clarigence.in");
         assertEquals(expected,json.readTree(migrated.getContentJson()));
         assertEquals(versionBefore+1,migrated.getVersion());
-        assertTrue(documents.existsById("business-email-migrated"));
+        assertTrue(documents.existsById("business-email-corrected-v2"));
 
         initialization.initialize();
         assertEquals(expected,json.readTree(documents.findById("business").orElseThrow().getContentJson()));
         assertEquals(versionBefore+1,documents.findById("business").orElseThrow().getVersion());
     }
+    @Test void correctsMisspelledEmailAfterPreviousMigration() throws Exception {
+        documents.deleteById("business-email-corrected-v2");
+        documents.saveAndFlush(new in.clarigence.contactapi.entity.SiteDocument("business-email-migrated","{}"));
+        var business=documents.findById("business").orElseThrow();
+        ObjectNode values=(ObjectNode)json.readTree(business.getContentJson());
+        values.put("email","hello@clargience.in");
+        business.setContentJson(json.writeValueAsString(values));
+        documents.saveAndFlush(business);
+        initialization.initialize();
+        assertEquals("hello@clarigence.in",json.readTree(documents.findById("business").orElseThrow().getContentJson()).get("email").textValue());
+        assertTrue(documents.existsById("business-email-corrected-v2"));
+    }
     @Test void preservesCustomBusinessEmailOnStartup() throws Exception {
-        documents.deleteById("business-email-migrated");
+        documents.deleteById("business-email-corrected-v2");
         var business=documents.findById("business").orElseThrow();
         ObjectNode custom=(ObjectNode)json.readTree(business.getContentJson());
         custom.put("email","team@example.org");
@@ -85,7 +97,7 @@ class CmsIntegrationTest {
         var unchanged=documents.findById("business").orElseThrow();
         assertEquals(custom,json.readTree(unchanged.getContentJson()));
         assertEquals(versionBefore,unchanged.getVersion());
-        assertTrue(documents.existsById("business-email-migrated"));
+        assertTrue(documents.existsById("business-email-corrected-v2"));
 
         custom.put("email","clarigence@gmail.com");
         unchanged.setContentJson(json.writeValueAsString(custom));
