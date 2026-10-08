@@ -1,7 +1,50 @@
 const menuButton = document.querySelector('.menu-toggle');
 const nav = document.querySelector('.nav-links');
+const servicesGroup = document.querySelector('.nav-services');
+const servicesToggle = document.querySelector('.services-toggle');
+const servicesDropdown = document.querySelector('.services-dropdown');
+let servicesCloseTimer;
+const setServicesOpen = (open, returnFocus = false) => {
+  if (!servicesGroup || !servicesToggle || !servicesDropdown) return;
+  clearTimeout(servicesCloseTimer);
+  servicesGroup.classList.toggle('is-open', open);
+  servicesToggle.setAttribute('aria-expanded', String(open));
+  servicesDropdown.inert = !open;
+  if (returnFocus) servicesToggle.focus();
+};
+if (servicesGroup && servicesToggle) {
+  servicesToggle.addEventListener('click', () => setServicesOpen(servicesToggle.getAttribute('aria-expanded') !== 'true'));
+  servicesGroup.addEventListener('pointerenter', event => {
+    if (event.pointerType === 'mouse' && window.innerWidth > 900) setServicesOpen(true);
+  });
+  servicesGroup.addEventListener('pointerleave', event => {
+    if (event.pointerType === 'mouse' && window.innerWidth > 900) {
+      servicesCloseTimer = setTimeout(() => {
+        if (!servicesGroup.contains(document.activeElement)) setServicesOpen(false);
+      }, 160);
+    }
+  });
+  servicesGroup.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      setServicesOpen(false, true);
+    } else if (event.key === 'ArrowDown' && event.target === servicesToggle) {
+      event.preventDefault();
+      setServicesOpen(true);
+      servicesDropdown.querySelector('a')?.focus();
+    }
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!servicesGroup.contains(event.target)) setServicesOpen(false);
+  });
+  document.addEventListener('focusin', event => {
+    if (!servicesGroup.contains(event.target)) setServicesOpen(false);
+  });
+  window.matchMedia('(max-width: 900px)').addEventListener('change', () => setServicesOpen(false));
+}
 if (menuButton && nav) {
   const closeMenu = (returnFocus = false) => {
+    setServicesOpen(false);
     nav.classList.remove('open');
     menuButton.setAttribute('aria-expanded', 'false');
     menuButton.setAttribute('aria-label', 'Open navigation');

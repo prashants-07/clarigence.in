@@ -61,6 +61,17 @@
     try {
       const items=await api('/api/services');
       if(!Array.isArray(items))throw new Error('Invalid content');
+      const navigation=document.querySelector('[data-nav-services]');
+      if(navigation){
+        navigation.replaceChildren();
+        items.forEach(service=>{
+          const entry=link('',detailHref(service.slug),'service-menu-link');
+          const symbol=icon(service.icon);symbol.className='service-menu-icon';
+          const arrow=node('span','service-menu-arrow','↗');arrow.setAttribute('aria-hidden','true');
+          entry.append(symbol,node('span','',service.name),arrow);navigation.append(entry);
+        });
+        if(!items.length)navigation.append(node('p','services-menu-empty','New services are coming soon. Contact us to discuss your project.'));
+      }
       containers.forEach(container=>{
         container.replaceChildren();container.setAttribute('aria-busy','false');
         if(!items.length){status(container,'Services will be available soon. Contact us to discuss your requirements.','empty');return;}
