@@ -173,9 +173,17 @@
         text('.footer-bottom>span',`© ${new Date().getFullYear()} ${s.name}. All rights reserved.`);
         document.querySelectorAll('.brand').forEach(n=>n.setAttribute('aria-label',`${s.name} home`));
         document.querySelectorAll('.brand img').forEach(n=>{n.alt=s.name;});
-        document.querySelectorAll('a[href^="mailto:"]').forEach(a=>{a.href=`mailto:${s.email}`;a.textContent=s.email;});
+        document.querySelectorAll('a[href^="mailto:"]').forEach(a=>{if(!s.email)return;a.href=`mailto:${s.email}`;if(a.querySelector('svg')){a.title=`Email ${s.email}`;a.setAttribute('aria-label',`Email Clarigence at ${s.email}`);}else a.textContent=s.email;});
         document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>{a.hidden=!s.whatsapp;if(s.whatsapp)a.href=`https://wa.me/${s.whatsapp}`;});
-        const social=document.querySelector('.social-links');if(social){social.replaceChildren();[['LinkedIn',s.linkedin],['Instagram',s.instagram],['Facebook',s.facebook],['WhatsApp',s.whatsapp?`https://wa.me/${s.whatsapp}`:'']].forEach(([label,href])=>{if(!href)return;const a=link(`${label} ↗`,href,'');a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',`${label} (opens in a new tab)`);social.append(a);});}
+        const social=document.querySelector('.social-links');
+        if(social){
+          const profiles={LinkedIn:s.linkedin,Instagram:s.instagram,Facebook:s.facebook,YouTube:s.youtube};
+          social.querySelectorAll('a').forEach(a=>{
+            const label=a.querySelector('span')?.textContent;
+            const href=safeUrl(profiles[label]);
+            if(href)a.href=href;
+          });
+        }
         const contact=document.querySelector('.contact-info');if(contact){contact.querySelectorAll('[data-business-extra]').forEach(n=>n.remove());if(s.showPhone==='true'&&s.phone){const phone=node('a','',s.phone);phone.href=`tel:${s.phone.replace(/[^+0-9]/g,'')}`;phone.dataset.businessExtra='true';contact.append(phone);}if(s.hours){const hours=node('span','',s.hours);hours.dataset.businessExtra='true';contact.append(hours);}}
       }),
       api(`/api/content/seo-${key}`).then(s=>{
